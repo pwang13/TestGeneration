@@ -95,6 +95,12 @@ function generateTestCases()
 		var fileWithContent = _.some(constraints, {kind: 'fileWithContent' });
 		var pathExists      = _.some(constraints, {kind: 'fileExists' });
 
+
+		// handle p and q
+		var trueP = _.some(constraints,{ident:'p'});
+		var trueQ = _.some(constraints,{ident:'q'});
+
+
 		// plug-in values for parameters
 		for( var c = 0; c < constraints.length; c++ )
 		{
@@ -102,11 +108,22 @@ function generateTestCases()
 			if( params.hasOwnProperty( constraint.ident ) )
 			{
 				params[constraint.ident] = constraint.value;
+				// console.log(constraint.ident + "value" + constraint.value);
 			}
 		}
 
 		// Prepare function arguments.
 		var args = Object.keys(params).map( function(k) {return params[k]; }).join(",");
+		// console.log(args);
+
+		if (trueQ || trueP) 
+		{
+			content += generateTestQP(trueP,trueQ,funcName,args);
+			content += generateTestQP(!trueP,trueQ,funcName,args);
+			content += generateTestQP(trueP,!trueQ,funcName,args);
+			content += generateTestQP(!trueP,!trueQ,funcName,args);
+		}
+
 		if( pathExists || fileWithContent )
 		{
 			content += generateMockFsTestCases(pathExists,fileWithContent,funcName, args);
@@ -127,6 +144,32 @@ function generateTestCases()
 	fs.writeFileSync('test.js', content, "utf8");
 
 }
+
+function generateTestQP (trueP,trueQ,funcName,args) 
+{
+	var testCase = "";
+	var newArgs = args.split(',');
+	console.log("new arges: " + newArgs);
+	if (trueP) {
+		var number = -1;
+		newArgs[0] = number.toString();
+	}
+	if (!trueP) {
+		var number = 1;
+		newArgs[0] = number.toString();
+	}
+
+	if (!trueQ) {
+		var number = 1;
+		newArgs[1] = number.toString();
+	}
+	console.log("new arges: " + newArgs);
+
+	testCase+="subject.{0}({1});\n".format(funcName, newArgs);
+	console.log(testCase);
+	return testCase;
+}
+
 
 function generateMockFsTestCases (pathExists,fileWithContent,funcName,args) 
 {
@@ -162,8 +205,9 @@ function constraints(filePath)
 	{
 		if (node.type === 'FunctionDeclaration') 
 		{
+			// console.log(node);
 			var funcName = functionName(node);
-			console.log("Line : {0} Function: {1}".format(node.loc.start.line, funcName ));
+			// console.log("Line : {0} Function: {1}".format(node.loc.start.line, funcName ));
 
 			var params = node.params.map(function(p) {return p.name});
 
@@ -172,11 +216,12 @@ function constraints(filePath)
 			// Check for expressions using argument.
 			traverse(node, function(child)
 			{
-				if( child.type === 'BinaryExpression' && child.operator == "==")
+				if( child.type === 'BinaryExpression' && ((child.operator == "==" ) || (child.operator == "<")) )
 				{
 					if( child.left.type == 'Identifier' && params.indexOf( child.left.name ) > -1)
 					{
 						// get expression from original source code:
+						// console.log(params.indexOf( child.left.name ));
 						var expression = buf.substring(child.range[0], child.range[1]);
 						var rightHand = buf.substring(child.right.range[0], child.right.range[1])
 
@@ -190,8 +235,11 @@ function constraints(filePath)
 								operator : child.operator,
 								expression: expression
 							}));
+						// console.log(functionConstraints[funcName].constraints);
 					}
 				}
+
+				
 
 				if( child.type == "CallExpression" && 
 					 child.callee.property &&
@@ -240,7 +288,7 @@ function constraints(filePath)
 
 			});
 
-			console.log( functionConstraints[funcName]);
+			// console.log( functionConstraints[funcName]);
 
 		}
 	});

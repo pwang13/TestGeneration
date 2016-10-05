@@ -1,5 +1,9 @@
 var subject = require('./subject.js')
 var mock = require('mock-fs');
+subject.inc('',7.448712140321732);
+subject.inc(NaN,2.019068447407335);
+subject.inc('',undefined);
+subject.inc(NaN,undefined);
 subject.inc('',undefined);
 subject.weird('','','',"strict");
 mock({"path/fileExists":{},"pathContent":{"file1":"text content"}});
