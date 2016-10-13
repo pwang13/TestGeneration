@@ -99,7 +99,17 @@ function generateTestCases()
 		// handle p and q
 		var trueP = _.some(constraints,{ident:'p'});
 		var trueQ = _.some(constraints,{ident:'q'});
+		var trueY = _.some(constraints,{ident:'y'});
 
+		if (trueY) {
+			var args = Object.keys(params).map( function(k) {return params[k]; }).join(",");
+			console.log("has: "+ functionName + "\n" + args);
+		}
+
+		if (trueQ) {
+			var args = Object.keys(params).map( function(k) {return params[k]; }).join(",");
+			console.log("another: "+ functionName + "\n" + args);
+		}
 
 		// plug-in values for parameters
 		for( var c = 0; c < constraints.length; c++ )
@@ -115,7 +125,8 @@ function generateTestCases()
 		// Prepare function arguments.
 		var args = Object.keys(params).map( function(k) {return params[k]; }).join(",");
 		// console.log(args);
-
+		var boos = [true, false];
+		console.log(boos);
 		if (trueQ || trueP) 
 		{
 			content += generateTestQP(trueP,trueQ,funcName,args);
@@ -124,6 +135,23 @@ function generateTestCases()
 			content += generateTestQP(!trueP,!trueQ,funcName,args);
 		}
 
+		if (trueY) 
+		{
+			for ( boo in boos) {
+				console.log(boo);
+				for (bo in boos) {
+					for (b in boos) {
+						for (a in boos) {
+							content += generateTestY(boo, bo, b, a, funcName, args);
+						}
+					}
+				}
+			}
+			// content += generateTestY(trueP,trueQ,funcName,args);
+			// content += generateTestY(!trueP,trueQ,funcName,args);
+			// content += generateTestY(trueP,!trueQ,funcName,args);
+			// content += generateTestQP(!trueP,!trueQ,funcName,args);
+		}
 		if( pathExists || fileWithContent )
 		{
 			content += generateMockFsTestCases(pathExists,fileWithContent,funcName, args);
@@ -145,11 +173,61 @@ function generateTestCases()
 
 }
 
+function generateTestY (x, y, z, mode, funcName, args) {
+	console.log(x);
+	// console.log(x + y + z + mode);
+	var testCase = "";
+	var newArgs = args.split(',');
+	if (x == 1) {
+		var number = 8;
+		newArgs[0] = number.toString();
+	}
+
+	if (x == 0) {
+		var number = 0;
+		newArgs[0] = number.toString();
+	}
+
+	if (y == 1) {
+		var number = -1;
+		newArgs[1] = number.toString();
+	}
+
+	if (y == 0) {
+		var number = 1;
+		newArgs[1] = number.toString();
+	}
+
+	if (z == 1) {
+		var number = 30;
+		newArgs[2] = number.toString();
+	}
+
+	if (z == 0) {
+		var number = 44;
+		newArgs[2] = number.toString();
+	}
+
+	if (mode == 1) {
+		var str = "'strict'";
+		newArgs[3] = str;
+	}
+
+	if (mode == 0) {
+		var str = "'werw'";
+		newArgs[3] = str;
+	}
+
+	testCase+="subject.{0}({1});\n".format(funcName, newArgs);
+	console.log(testCase);
+	return testCase;
+}
+
 function generateTestQP (trueP,trueQ,funcName,args) 
 {
 	var testCase = "";
 	var newArgs = args.split(',');
-	console.log("new arges: " + newArgs);
+	// console.log("new arges: " + newArgs);
 	if (trueP) {
 		var number = -1;
 		newArgs[0] = number.toString();
@@ -163,10 +241,10 @@ function generateTestQP (trueP,trueQ,funcName,args)
 		var number = 1;
 		newArgs[1] = number.toString();
 	}
-	console.log("new arges: " + newArgs);
+	// console.log("new arges: " + newArgs);
 
 	testCase+="subject.{0}({1});\n".format(funcName, newArgs);
-	console.log(testCase);
+	// console.log(testCase);
 	return testCase;
 }
 
@@ -216,7 +294,7 @@ function constraints(filePath)
 			// Check for expressions using argument.
 			traverse(node, function(child)
 			{
-				if( child.type === 'BinaryExpression' && ((child.operator == "==" ) || (child.operator == "<")) )
+				if( child.type === 'BinaryExpression' && ((child.operator == "==" ) || (child.operator == "<") || (child.operator == "<")) )
 				{
 					if( child.left.type == 'Identifier' && params.indexOf( child.left.name ) > -1)
 					{
@@ -238,6 +316,32 @@ function constraints(filePath)
 						// console.log(functionConstraints[funcName].constraints);
 					}
 				}
+
+
+				// if( child.type === 'BinaryExpression' && child.operator == "&&")
+				// {
+				// 	if( child.left.type == 'BinaryExpression' && child.left.operator==">") {
+				// 		if (child.left.left.type == 'Identifier' && params.indexOf( child.left.left.name ) > -1) {
+				// 			var expression = buf.substring(child.left.range[0], child.range[1]);
+
+				// 		}
+
+				// 		if (child.left.right.type == 'Identifier' && params.indexOf( child.left.right.name ) > -1) {
+
+				// 		}
+				// 	}
+				// 	{
+				// 		// get expression from original source code:
+				// 		//var expression = buf.substring(child.range[0], child.range[1]);
+				// 		var rightHand = buf.substring(child.right.range[0], child.right.range[1])
+				// 		functionConstraints[funcName].constraints.push(
+				// 			{
+				// 				ident: 'phoneNumber',
+				// 				value: rightHand,
+				// 			}
+				// 		);
+				// 	}
+				// }
 
 				
 
