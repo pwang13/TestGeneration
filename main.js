@@ -417,6 +417,8 @@ function constraints(filePath)
 						// console.log(functionConstraints[funcName].constraints);
 					}
 				}
+
+				
 				if( child.type === 'BinaryExpression' && child.operator == "!=")
 				{
 					if( child.left.type == 'Identifier' && child.left.name=="area")
