@@ -102,19 +102,23 @@ function generateTestCases()
 		var trueQ = _.some(constraints,{ident:'q'});
 		var trueY = _.some(constraints,{ident:'y'});
 		var buf= _.some(constraints,{ident:'buf'});
+		var trueMode = _.some(constraints,{ident:'mode'});
 		var options = _.some(constraints,{ident:'options'});
 		var region= _.some(constraints,{ident:'phoneNumber'});
 		var formatString=_.some(constraints,{ident:'formatString'});
 
-		if (trueY) {
-			var args = Object.keys(params).map( function(k) {return params[k]; }).join(",");
-			// console.log("has: "+ functionName + "\n" + args);
-		}
+		// if (trueY || trueMode) {
+		// console.log("constraints: " + constraints);
+		// 	var args = Object.keys(params).map( function(k) {return params[k]; }).join(",");
+		// console.log("params :" + params);
+		// 	console.log(args);
+		// 	// console.log("has: "+ functionName + "\n" + args);
+		// }
 
-		if (trueQ) {
-			var args = Object.keys(params).map( function(k) {return params[k]; }).join(",");
-			// console.log("another: "+ functionName + "\n" + args);
-		}
+		// if (trueQ) {
+		// 	var args = Object.keys(params).map( function(k) {return params[k]; }).join(",");
+		// 	// console.log("another: "+ functionName + "\n" + args);
+		// }
 
 		// plug-in values for parameters
 		for( var c = 0; c < constraints.length; c++ )
@@ -129,6 +133,7 @@ function generateTestCases()
 
 		// Prepare function arguments.
 		var args = Object.keys(params).map( function(k) {return params[k]; }).join(",");
+		// console.log (args);
 		// console.log(args);
 		var boos = [true, false];
 		// console.log(boos);
@@ -140,7 +145,7 @@ function generateTestCases()
 			content += generateTestQP(!trueP,!trueQ,funcName,args);
 		}
 
-		if (trueY) 
+		if (trueY || trueMode) 
 		{
 			for ( boo in boos) {
 				// console.log(boo);
@@ -221,42 +226,45 @@ function generateTestR(region,funcName,args){
 }
 
 function generateTestY (x, y, z, mode, funcName, args) {
-	// console.log(x);
+	console.log(args);
 	// console.log(x + y + z + mode);
+	// var newArgs = args.split(',');
 	var testCase = "";
 	var newArgs = args.split(',');
 	if (x == 1) {
-		var number = 88;
+		// var number = newArgs[0] + ;
+		var number = newArgs[0] + 1;
 		newArgs[0] = number.toString();
 	}
 
 	if (x == 0) {
-		var number = 80;
+		var number = newArgs[0] - 1;
 		newArgs[0] = number.toString();
 	}
 
 	if (y == 1) {
-		var number = -4;
+		var number = newArgs[1] + 1;
 		newArgs[1] = number.toString();
 	}
 
 	if (y == 0) {
-		var number = 80;
+		var number = newArgs[1] - 1;
 		newArgs[1] = number.toString();
 	}
 
 	if (z == 1) {
-		var number = 30;
+		var number = newArgs[2] - 1;
 		newArgs[2] = number.toString();
 	}
 
 	if (z == 0) {
-		var number = 44;
+		var number = newArgs[2] + 1;
 		newArgs[2] = number.toString();
 	}
 
 	if (mode == 1) {
-		var str = "'strictly'";
+		// var str = "'strictly'";
+		var str = newArgs[3];
 		newArgs[3] = str;
 	}
 
@@ -281,25 +289,27 @@ function generateTestY (x, y, z, mode, funcName, args) {
 
 function generateTestQP (trueP,trueQ,funcName,args) 
 {
+	// console.log("args: " + args);
 	var testCase = "";
 	var newArgs = args.split(',');
 	// console.log("new arges: " + newArgs);
 	if (trueP) {
-		var number = -101;
+		var number = newArgs[0] - 1;
+		// console.log("p :" + number);
 		newArgs[0] = number.toString();
 	}
 	if (!trueP) {
-		var number = 1;
+		var number = newArgs[0] + 1;
 		newArgs[0] = number.toString();
 	}
 
 	if (trueQ) {
-		var number = 77;
+		var number = newArgs[1] - 1;
 		newArgs[1] = number.toString();
 	}
 
 	if (!trueQ) {
-		var number = 70;
+		var number = newArgs[1] + 1;
 		newArgs[1] = number.toString();
 	}
 	// console.log("new arges: " + newArgs);
@@ -385,7 +395,7 @@ function constraints(filePath)
 			// Check for expressions using argument.
 			traverse(node, function(child)
 			{
-				if( child.type === 'BinaryExpression' && ((child.operator == "==" ) || (child.operator == "<") || (child.operator == "<")) )
+				if( child.type === 'BinaryExpression' && ((child.operator == "==" ) || (child.operator == "<") || (child.operator == ">") ) )
 				{
 					if( child.left.type == 'Identifier' && params.indexOf( child.left.name ) > -1)
 					{
