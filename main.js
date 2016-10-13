@@ -13,7 +13,8 @@ function main()
 
 	if( args.length == 0 )
 	{
-		args = ["subject.js"];
+		// args = ["subject.js"];
+		args = ["mystery.js"];
 	}
 	var filePath = args[0];
 
@@ -74,7 +75,7 @@ var mockFileLibrary =
 function generateTestCases()
 {
 
-	var content = "var subject = require('./subject.js')\nvar mock = require('mock-fs');\n";
+	var content = "var subject = require('./mystery.js')\nvar mock = require('mock-fs');\n";
 	for ( var funcName in functionConstraints )
 	{
 		var params = {};
@@ -107,12 +108,12 @@ function generateTestCases()
 
 		if (trueY) {
 			var args = Object.keys(params).map( function(k) {return params[k]; }).join(",");
-			console.log("has: "+ functionName + "\n" + args);
+			// console.log("has: "+ functionName + "\n" + args);
 		}
 
 		if (trueQ) {
 			var args = Object.keys(params).map( function(k) {return params[k]; }).join(",");
-			console.log("another: "+ functionName + "\n" + args);
+			// console.log("another: "+ functionName + "\n" + args);
 		}
 
 		// plug-in values for parameters
@@ -130,7 +131,7 @@ function generateTestCases()
 		var args = Object.keys(params).map( function(k) {return params[k]; }).join(",");
 		// console.log(args);
 		var boos = [true, false];
-		console.log(boos);
+		// console.log(boos);
 		if (trueQ || trueP) 
 		{
 			content += generateTestQP(trueP,trueQ,funcName,args);
@@ -142,7 +143,7 @@ function generateTestCases()
 		if (trueY) 
 		{
 			for ( boo in boos) {
-				console.log(boo);
+				// console.log(boo);
 				for (bo in boos) {
 					for (b in boos) {
 						for (var i = 0; i < 3; i++) {
@@ -155,7 +156,7 @@ function generateTestCases()
 		if( pathExists || fileWithContent )
 		{
 			for ( boo in boos) {
-				console.log(boo);
+				// console.log(boo);
 				for (bo in boos) {
 					for (b in boos) {
 						for (a in boos) {
@@ -171,6 +172,7 @@ function generateTestCases()
 			content+=generateTestO(false,funcName,args);
 		}
 		if(region){
+			console.log("in region");
 			content+=generateTestR(true,funcName,args);
 			content+=generateTestR(false,funcName,args);
 		}
@@ -189,52 +191,57 @@ function generateTestO(options,funcName,args){
 	
 	var number="'"+faker.phone.phoneNumberFormat().toString()+"'";
 	var numberFormat="'"+faker.phone.phoneFormats().toString()+"'";
+	// console.log("number: "+ number);
 	newArgs[0]=number;
 	newArgs[1]=numberFormat;
 	if(!options){
 		newArgs[2]="false";
 	}
 	testCase+="subject.{0}({1});\n".format(funcName, newArgs);
+	// console.log("testcase: "+ testCase);
 	return testCase;
 }
 
 function generateTestR(region,funcName,args){
+	console.log("in region");
 	var testCase="";
 	var newArgs=args.split(',');
 	newArgs[0]=newArgs[0].substring(1,4);
 	var number=faker.phone.phoneNumberFormat().toString();
 	if(region){
 		number=newArgs[0]+number.substring(3,12);
+		// number = "919-123-4567"
+		console.log("number: "+ number);
 	}
 	number="'"+number+"'";
 	newArgs[0]=number;
 	testCase+="subject.{0}({1});\n".format(funcName, newArgs);
-	console.log("phone: " +testCase);
+	// console.log("phone: " +testCase);
 	return testCase;
 }
 
 function generateTestY (x, y, z, mode, funcName, args) {
-	console.log(x);
+	// console.log(x);
 	// console.log(x + y + z + mode);
 	var testCase = "";
 	var newArgs = args.split(',');
 	if (x == 1) {
-		var number = 8;
+		var number = 88;
 		newArgs[0] = number.toString();
 	}
 
 	if (x == 0) {
-		var number = 0;
+		var number = 80;
 		newArgs[0] = number.toString();
 	}
 
 	if (y == 1) {
-		var number = -1;
+		var number = -4;
 		newArgs[1] = number.toString();
 	}
 
 	if (y == 0) {
-		var number = 1;
+		var number = 80;
 		newArgs[1] = number.toString();
 	}
 
@@ -249,12 +256,12 @@ function generateTestY (x, y, z, mode, funcName, args) {
 	}
 
 	if (mode == 1) {
-		var str = "'strict'";
+		var str = "'strictly'";
 		newArgs[3] = str;
 	}
 
 	if (mode == 0) {
-		var str = "'werw'";
+		var str = "'bob'";
 		newArgs[3] = str;
 	}
 
@@ -263,8 +270,12 @@ function generateTestY (x, y, z, mode, funcName, args) {
 		newArgs[3] = str;
 	}
 
+	if (z == 0 && mode == 0) {
+		var str = "'stricter'";
+		newArgs[3] = str;
+	}
 	testCase+="subject.{0}({1});\n".format(funcName, newArgs);
-	console.log(testCase);
+	// console.log(testCase);
 	return testCase;
 }
 
@@ -274,7 +285,7 @@ function generateTestQP (trueP,trueQ,funcName,args)
 	var newArgs = args.split(',');
 	// console.log("new arges: " + newArgs);
 	if (trueP) {
-		var number = -1;
+		var number = -101;
 		newArgs[0] = number.toString();
 	}
 	if (!trueP) {
@@ -282,8 +293,13 @@ function generateTestQP (trueP,trueQ,funcName,args)
 		newArgs[0] = number.toString();
 	}
 
+	if (trueQ) {
+		var number = 77;
+		newArgs[1] = number.toString();
+	}
+
 	if (!trueQ) {
-		var number = 1;
+		var number = 70;
 		newArgs[1] = number.toString();
 	}
 	// console.log("new arges: " + newArgs);
@@ -296,27 +312,27 @@ function generateTestQP (trueP,trueQ,funcName,args)
 
 function generateMockFsTestCases (pathExists,fileWithContent, buf, len, funcName,args) 
 {
-	console.log("pathExists: " + pathExists);
+	// console.log("pathExists: " + pathExists);
 	var testCase = "";
 	// Build mock file system based on constraints.
 	var mergedFS = {};
 	if( pathExists == 1 )
 	{
-		console.log("in path\n");
-		for (var attrname in mockFileLibrary.pathExists) { mergedFS[attrname] = mockFileLibrary.pathExists[attrname]; 
-			console.log(mergedFS[attrname]);}
+		// console.log("in path\n");
+		for (var attrname in mockFileLibrary.pathExists) { mergedFS[attrname] = mockFileLibrary.pathExists[attrname]; }
+			// console.log(mergedFS[attrname]);}
 	}
 
 	if( fileWithContent == 1)
 	{
-		for (var attrname in mockFileLibrary.fileWithContent) { console.log("att: " +attrname); mergedFS[attrname] = mockFileLibrary.fileWithContent[attrname]; }
+		for (var attrname in mockFileLibrary.fileWithContent) { mergedFS[attrname] = mockFileLibrary.fileWithContent[attrname]; }
 		mergedFS['path/fileExists'] = {'file1' : ''};
 
 	}
 
 	if( fileWithContent == 0 )
 	{
-		for (var attrname in mockFileLibrary.fileWithContent) { console.log("att: " +attrname); mergedFS[attrname] = mockFileLibrary.fileWithContent[attrname]; }
+		for (var attrname in mockFileLibrary.fileWithContent) {  mergedFS[attrname] = mockFileLibrary.fileWithContent[attrname]; }
 			mergedFS['path/fileExists'] = {'file1' : 'hello'};
 			mergedFS['pathContent'] = {};
 		// console.log("merge: " +mergedFS);
@@ -391,7 +407,7 @@ function constraints(filePath)
 						// console.log(functionConstraints[funcName].constraints);
 					}
 				}
-				if( child.type === 'BinaryExpression' && child.operator == "==")
+				if( child.type === 'BinaryExpression' && child.operator == "!=")
 				{
 					if( child.left.type == 'Identifier' && child.left.name=="area")
 					{
