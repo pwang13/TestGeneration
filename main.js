@@ -153,14 +153,15 @@ function generateTestCases()
 		}
 		if( pathExists || fileWithContent )
 		{
-			content += generateMockFsTestCases(pathExists,fileWithContent, buf, funcName, args);
+			content += generateMockFsTestCases(pathExists,fileWithContent, buf, true,funcName, args);
 			// Bonus...generate constraint variations test cases....
-			content += generateMockFsTestCases(!pathExists,fileWithContent, buf, funcName, args);
-			content += generateMockFsTestCases(pathExists,!fileWithContent,buf, funcName, args);
-			content += generateMockFsTestCases(!pathExists,!fileWithContent,buf, funcName, args);
-			content += generateMockFsTestCases(pathExists,!fileWithContent,!buf, funcName, args);
-			content += generateMockFsTestCases(pathExists, fileWithContent, buf, funcName, args);
-			content += generateMockFsTestCases(pathExists, fileWithContent, !buf, funcName, args);
+			content += generateMockFsTestCases(!pathExists,fileWithContent, buf, true,funcName, args);
+			content += generateMockFsTestCases(pathExists,!fileWithContent,buf, true,funcName, args);
+			content += generateMockFsTestCases(!pathExists,!fileWithContent,buf, true,funcName, args);
+			content += generateMockFsTestCases(pathExists,!fileWithContent,!buf, true,funcName, args);
+			content += generateMockFsTestCases(pathExists, fileWithContent, buf, true,funcName, args);
+			content += generateMockFsTestCases(pathExists, fileWithContent, !buf, true,funcName, args);
+			content += generateMockFsTestCases(pathExists, fileWithContent, buf, false,funcName, args);
 		}
 
 		if(options){
@@ -291,7 +292,7 @@ function generateTestQP (trueP,trueQ,funcName,args)
 }
 
 
-function generateMockFsTestCases (pathExists,fileWithContent, buf, funcName,args) 
+function generateMockFsTestCases (pathExists,fileWithContent, buf, len, funcName,args) 
 {
 	var testCase = "";
 	// Build mock file system based on constraints.
@@ -302,12 +303,25 @@ function generateMockFsTestCases (pathExists,fileWithContent, buf, funcName,args
 		for (var attrname in mockFileLibrary.pathExists) { mergedFS[attrname] = mockFileLibrary.pathExists[attrname]; 
 			console.log(mergedFS[attrname]);}
 	}
+
+	if( fileWithContent )
+	{
+		for (var attrname in mockFileLibrary.fileWithContent) { console.log("att: " +attrname); mergedFS[attrname] = mockFileLibrary.fileWithContent[attrname]; }
+		mergedFS['path/fileExists'] = {'file1' : ''};
+
+	}
+
 	if( !fileWithContent )
 	{
-		for (var attrname in mockFileLibrary.fileWithContent) { mergedFS[attrname] = mockFileLibrary.fileWithContent[attrname]; }
+		for (var attrname in mockFileLibrary.fileWithContent) { console.log("att: " +attrname); mergedFS[attrname] = mockFileLibrary.fileWithContent[attrname]; }
+			mergedFS['path/fileExists'] = {'file1' : 'hello'};
+			mergedFS['pathContent'] = {};
+		// console.log("merge: " +mergedFS);
 	}
+
 	if( fileWithContent && !buf){
 		for (var attrname in mockFileLibrary.fileWithContent) { mergedFS[attrname] = mockFileLibrary.fileWithContent[attrname]; }
+		// mergedFS['path/fileExists']['file1']="hello";
 		mergedFS['pathContent']['file1']="";
 	}
 	if( fileWithContent && buf){
@@ -316,6 +330,11 @@ function generateMockFsTestCases (pathExists,fileWithContent, buf, funcName,args
 		mergedFS['pathContent']['file1']="hi";
 	}
 
+	if (!len) {
+		for (var attrname in mockFileLibrary.fileWithContent) { mergedFS[attrname] = mockFileLibrary.fileWithContent[attrname]; }
+		mergedFS['path/fileExists'] = {};
+		mergedFS['pathContent'] = {};
+	}
 	testCase += 
 	"mock(" +
 		JSON.stringify(mergedFS)
